@@ -1,4 +1,4 @@
-import { set, observable, action, autorun, toJS, observe } from 'mobx'
+import { set, observable, action, autorun, toJS, observe, runInAction } from 'mobx'
 import queryString from 'query-string'
 import 'history-events'
 
@@ -69,10 +69,11 @@ export default ({ hashHistory, arrayFormat = 'bracket' }) => {
       } else {
         const newSearch = '?' + queryInObservable + hash
 
-        locationObservable.search = newSearch
+        runInAction(() => locationObservable.search = newSearch)
+    
         newUrl += newSearch
       }
-      locationObservable.href = newUrl
+      runInAction(() => locationObservable.href = newUrl)
 
       window.removeEventListener('changestate', snapshotAndSet)
       // console.log('newUrl: ', newUrl)
