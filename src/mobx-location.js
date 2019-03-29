@@ -37,6 +37,19 @@ export default ({ hashHistory, arrayFormat = 'bracket' }) => {
   const firstSnapshot = createSnapshot()
   const locationObservable = observable(firstSnapshot)
 
+  const snapshotAndSet = action('changestateHandler', (ev) => {
+    const snapshot = createSnapshot(toJS(locationObservable.query))
+    const currentlyInObservable = toJS(locationObservable)
+    //unfortunately we need to check that the new snapshot is different-for example when integrating with angularjs it happens that angular router is setting a URL again after we changed it via interacting with observable
+
+    if (
+      snapshot.href !== currentlyInObservable &&
+      decodeURI(snapshot.href) !== locationObservable.href
+    ) {
+      set(locationObservable, snapshot)
+    }
+  })
+  
   /**
    * executes each time a mobxLocation.query is mutated
    */
@@ -68,9 +81,6 @@ export default ({ hashHistory, arrayFormat = 'bracket' }) => {
         newUrl += newHash
       } else {
         const newSearch = '?' + queryInObservable + hash
-
-        runInAction(() => locationObservable.search = newSearch)
-    
         newUrl += newSearch
       }
       runInAction(() => locationObservable.href = newUrl)
@@ -84,18 +94,7 @@ export default ({ hashHistory, arrayFormat = 'bracket' }) => {
 
   let unsubscribe = autorun(propagateQueryToLocationSearch)
 
-  const snapshotAndSet = action('changestateHandler', (ev) => {
-    const snapshot = createSnapshot(toJS(locationObservable.query))
-    const currentlyInObservable = toJS(locationObservable)
-    //unfortunately we need to check that the new snapshot is different-for example when integrating with angularjs it happens that angular router is setting a URL again after we changed it via interacting with observable
 
-    if (
-      snapshot.href !== currentlyInObservable &&
-      decodeURI(snapshot.href) !== locationObservable.href
-    ) {
-      set(locationObservable, snapshot)
-    }
-  })
 
   observe(locationObservable, (change) => {
     const { name } = change
