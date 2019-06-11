@@ -40,6 +40,6 @@
   },
   "dependencies": {
     "history-events": "^1.0.4",
-    "query-string": "^6.2.0"
+    "query-string": "^6.7.0"
   }
 }
